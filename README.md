@@ -106,7 +106,7 @@ library_ms/
 
 ## 👩‍💻 Developer
 
-Built by **Ayushi** | MSc Business Analytics | PJHPL
+Built by **Harsh Gupta** | Terna Engineering College |
 
 ---
 
