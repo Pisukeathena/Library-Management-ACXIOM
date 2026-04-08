@@ -1,6 +1,8 @@
 # 📚 Library Management System
 
-A full-stack Library Management System built with **Python (Flask)**, **HTML**, **CSS**, and **SQLite**. Developed as a task for Acxiom Drive 2026 (ERP domain).
+A full-stack Library Management System built with **Python (Flask)**, **HTML**, **CSS**, and **SQLite**. Developed as a task for Acxiom Drive 2026 (ERP domain). 
+⚠️ This is a Flask (Python) web application.
+To run locally: pip install -r requirements.txt → python app.py
 
 ---
 
