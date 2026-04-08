@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}User Management — LibraryMS{% endblock %}
+{% block page_title %}User Management{% endblock %}
+{% block topbar_actions %}<a href="{{ url_for('maintenance') }}" class="btn btn-outline btn-sm">← Maintenance</a>{% endblock %}
+{% block content %}
+<div style="display:grid;grid-template-columns:400px 1fr;gap:18px;align-items:start;">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Add / Manage User</span></div>
+    <form method="POST" action="{{ url_for('user_management') }}" id="userForm">
+
+      <!-- New / Existing radio -->
+      <div class="form-group">
+        <label class="form-label">Action * <span style="font-size:10px;color:var(--ink3);">(default: New User)</span></label>
+        <div style="display:flex;gap:20px;padding:10px 0;">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;">
+            <input type="radio" name="user_action" value="new" checked onchange="toggleUserMode(this.value)" style="width:16px;height:16px;accent-color:var(--lime);"/> New User
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;">
+            <input type="radio" name="user_action" value="existing" onchange="toggleUserMode(this.value)" style="width:16px;height:16px;accent-color:var(--lime);"/> Existing User
+          </label>
+        </div>
+      </div>
+
+      <!-- Existing user selector -->
+      <div id="existingSection" style="display:none;">
+        <div class="form-group">
+          <label class="form-label">Select User</label>
+          <select name="user_id" class="form-control" onchange="populateUser(this)">
+            <option value="">— Select existing user —</option>
+            {% for u in all_users %}
+            <option value="{{ u.id }}" data-name="{{ u.name }}" data-email="{{ u.email }}" data-role="{{ u.role }}">{{ u.name }} ({{ u.email }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+          <button type="submit" name="sub_action" value="activate" class="btn btn-success btn-sm">Activate</button>
+          <button type="submit" name="sub_action" value="deactivate" class="btn btn-danger btn-sm">Deactivate</button>
+          <button type="submit" name="sub_action" value="update" class="btn btn-warning btn-sm">Update Details</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Name *</label>
+        <input type="text" name="name" id="userName" class="form-control" placeholder="Full name" value="{{ form.get('name','') }}" required/>
+      </div>
+      <div id="newUserFields">
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input type="email" name="email" class="form-control" placeholder="user@email.com" value="{{ form.get('email','') }}"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password <span id="pwdHint" style="font-size:10px;color:var(--ink3);">*</span></label>
+          <input type="password" name="password" class="form-control" placeholder="••••••••"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Role</label>
+        <select name="role" class="form-control">
+          <option value="user" {% if form.get('role','user')=='user' %}selected{% endif %}>User</option>
+          <option value="admin" {% if form.get('role')=='admin' %}selected{% endif %}>Admin</option>
+        </select>
+      </div>
+
+      <div id="newSubmitBtn">
+        <button type="submit" class="btn btn-primary">Create User</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-title">All Users <span style="color:var(--ink3);font-weight:400;font-family:var(--font-body)">({{ all_users|length }})</span></span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for u in all_users %}
+          <tr>
+            <td style="color:var(--ink3);font-size:12px">{{ u.id }}</td>
+            <td style="font-weight:500">{{ u.name }}</td>
+            <td style="font-size:13px;color:var(--ink2)">{{ u.email }}</td>
+            <td><span class="badge badge-{% if u.role=='admin' %}premium{% else %}standard{% endif %}">{{ u.role.title() }}</span></td>
+            <td><span class="badge badge-{% if u.is_active_user %}active{% else %}inactive{% endif %}">{% if u.is_active_user %}Active{% else %}Inactive{% endif %}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleUserMode(val) {
+  var existingSec  = document.getElementById('existingSection');
+  var newFields    = document.getElementById('newUserFields');
+  var newSubmitBtn = document.getElementById('newSubmitBtn');
+  var pwdHint      = document.getElementById('pwdHint');
+  if (val === 'existing') {
+    existingSec.style.display  = 'block';
+    newFields.style.display    = 'none';
+    newSubmitBtn.style.display = 'none';
+  } else {
+    existingSec.style.display  = 'none';
+    newFields.style.display    = 'block';
+    newSubmitBtn.style.display = 'block';
+  }
+}
+
+function populateUser(sel) {
+  var opt = sel.options[sel.selectedIndex];
+  if (opt.value) {
+    document.getElementById('userName').value = opt.dataset.name;
+    document.querySelector('[name="role"]').value = opt.dataset.role;
+  }
+}
+</script>
+{% endblock %}

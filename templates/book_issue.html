@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Book Issue — LibraryMS{% endblock %}
+{% block page_title %}Book Issue{% endblock %}
+{% block topbar_actions %}<a href="{{ url_for('book_search') }}" class="btn btn-outline btn-sm">← Search Books</a>{% endblock %}
+{% block content %}
+<div style="display:grid;grid-template-columns:1fr 280px;gap:18px;align-items:start;">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Issue Book to Member</span></div>
+    <form method="POST" action="{{ url_for('book_issue') }}" id="issueForm">
+      <input type="hidden" name="book_id" value="{{ book.id if book else '' }}"/>
+
+      <!-- Book details -->
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:18px;">
+        <div class="form-label" style="margin-bottom:8px;">Selected Book</div>
+        {% if book %}
+        <div style="display:flex;gap:20px;flex-wrap:wrap;">
+          <div><span style="font-size:11px;color:var(--ink3);display:block;">Title</span><span style="font-weight:600;color:var(--ink)">{{ book.title }}</span></div>
+          <div><span style="font-size:11px;color:var(--ink3);display:block;">Author</span><span id="authorDisplay" style="color:var(--ink2)">{{ book.author }}</span></div>
+          <div><span style="font-size:11px;color:var(--ink3);display:block;">Serial No</span><span style="font-family:monospace;color:var(--ink3)">{{ book.serial_no }}</span></div>
+          <div><span style="font-size:11px;color:var(--ink3);display:block;">Available</span><span style="color:var(--emerald);font-weight:700">{{ book.available_copies }}</span></div>
+        </div>
+        {% else %}
+        <p style="color:var(--coral);font-size:13px;">⚠ No book selected. <a href="{{ url_for('book_search') }}" style="color:var(--lime);">Search and select a book first.</a></p>
+        {% endif %}
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Name of Book *</label>
+          <input type="text" class="form-control" value="{{ book.title if book else '' }}" readonly style="background:var(--bg3);cursor:not-allowed;opacity:0.8;"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Author (Auto-populated)</label>
+          <input type="text" class="form-control" value="{{ book.author if book else '' }}" readonly style="background:var(--bg3);cursor:not-allowed;opacity:0.8;"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Membership Number *</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" name="membership_no" id="membershipNo" class="form-control" placeholder="e.g. MEM0001" value="{{ membership_no or '' }}" required oninput="lookupMember(this.value)"/>
+          <div id="memberStatus" style="display:flex;align-items:center;font-size:12px;white-space:nowrap;padding:0 8px;"></div>
+        </div>
+        <div id="memberInfo" style="margin-top:6px;font-size:12.5px;color:var(--ink2);"></div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Issue Date * <span style="font-size:10px;color:var(--ink3)">(cannot be earlier than today)</span></label>
+          <input type="date" name="issue_date" id="issueDate" class="form-control" min="{{ today }}" value="{{ today }}" required onchange="updateMaxReturn()"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Return Date * <span style="font-size:10px;color:var(--ink3)">(max 15 days from issue)</span></label>
+          <input type="date" name="return_date" id="returnDate" class="form-control" value="{{ default_return }}" required/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Remarks <span style="font-size:10px;color:var(--ink3)">(optional)</span></label>
+        <textarea name="remarks" class="form-control" rows="2" placeholder="Any additional notes…"></textarea>
+      </div>
+
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary" {% if not book %}disabled title="Select a book first"{% endif %}>Issue Book</button>
+        <a href="{{ url_for('book_search') }}" class="btn btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-title">Rules</span></div>
+    <div style="font-size:12.5px;color:var(--ink2);line-height:1.9;display:flex;flex-direction:column;gap:6px;">
+      <p>📅 Issue date ≥ today</p>
+      <p>📅 Return date auto = issue + 15 days</p>
+      <p>✏️ Return date can be edited (earlier only)</p>
+      <p>🚫 Return date cannot exceed 15 days</p>
+      <p>💰 Fine: <strong style="color:var(--amber)">₹5/day</strong> after due date</p>
+      <p>🔖 Membership must be active</p>
+    </div>
+  </div>
+</div>
+
+<script>
+var today = new Date('{{ today }}');
+
+function updateMaxReturn() {
+  var issueDateVal = document.getElementById('issueDate').value;
+  if (!issueDateVal) return;
+  var issueDate = new Date(issueDateVal);
+  var maxDate   = new Date(issueDate);
+  maxDate.setDate(maxDate.getDate() + 15);
+  var returnInput = document.getElementById('returnDate');
+  var maxStr = maxDate.toISOString().split('T')[0];
+  returnInput.setAttribute('max', maxStr);
+  returnInput.setAttribute('min', issueDateVal);
+  returnInput.value = maxStr;
+}
+
+function lookupMember(val) {
+  val = val.trim();
+  var statusEl = document.getElementById('memberStatus');
+  var infoEl   = document.getElementById('memberInfo');
+  if (val.length < 4) { statusEl.innerHTML=''; infoEl.innerHTML=''; return; }
+  fetch('/api/membership/' + encodeURIComponent(val))
+    .then(r => r.json())
+    .then(data => {
+      if (data.found) {
+        statusEl.innerHTML = '<span style="color:var(--emerald)">✓ Found</span>';
+        infoEl.innerHTML = '<strong>' + data.name + '</strong> · ' + data.email + ' · <span class="badge badge-' + (data.status==='Active'?'active':'inactive') + '">' + data.status + '</span>';
+      } else {
+        statusEl.innerHTML = '<span style="color:var(--coral)">✕ Not found</span>';
+        infoEl.innerHTML = '';
+      }
+    });
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', function() {
+  updateMaxReturn();
+  var memNo = document.getElementById('membershipNo').value;
+  if (memNo) lookupMember(memNo);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Book Available — LibraryMS{% endblock %}
+{% block page_title %}Book Available{% endblock %}
+{% block content %}
+<div class="card" style="margin-bottom:18px;">
+  <div class="card-header"><span class="card-title">Search Available Books</span></div>
+  <form method="GET" action="{{ url_for('book_search') }}">
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Title</label>
+        <input type="text" name="title" class="form-control" placeholder="Enter book title…" value="{{ title }}"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Author</label>
+        <input type="text" name="author" class="form-control" placeholder="Enter author name…" value="{{ author }}"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select name="category" class="form-control">
+          <option value="">— All Categories —</option>
+          {% for cat in categories %}
+          <option value="{{ cat.id }}" {% if category == cat.id|string %}selected{% endif %}>{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="display:flex;align-items:flex-end;">
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">🔍 Search</button>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--ink3);margin-top:-8px;">At least one field must be filled before searching.</p>
+  </form>
+</div>
+
+{% if searched %}
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Search Results <span style="color:var(--ink3);font-weight:400;font-family:var(--font-body)">({{ results|length }} found)</span></span>
+    {% if results %}
+    <button class="btn btn-primary btn-sm" onclick="issueSelected()">Issue Selected Book →</button>
+    {% endif %}
+  </div>
+  <div class="table-wrap">
+    {% if results %}
+    <form id="searchResultForm">
+      <table>
+        <thead><tr><th>Serial No</th><th>Title</th><th>Author</th><th>Type</th><th>Category</th><th>Available</th><th>Year</th><th>Select</th></tr></thead>
+        <tbody>
+          {% for book in results %}
+          <tr>
+            <td style="font-family:monospace;font-size:12px;color:var(--ink3)">{{ book.serial_no }}</td>
+            <td style="font-weight:500">{{ book.title }}</td>
+            <td style="color:var(--ink2)">{{ book.author }}</td>
+            <td><span class="badge badge-{% if book.item_type=='movie' %}premium{% else %}standard{% endif %}">{{ book.item_type.title() }}</span></td>
+            <td>{% if book.category %}{{ book.category.name }}{% else %}—{% endif %}</td>
+            <td style="color:var(--emerald);font-weight:700">{{ book.available_copies }}</td>
+            <td style="color:var(--ink3)">{{ book.published_year or '—' }}</td>
+            <td style="text-align:center;">
+              <input type="radio" name="selected_book" value="{{ book.id }}" style="width:16px;height:16px;accent-color:var(--lime);cursor:pointer;"/>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </form>
+    {% else %}
+    <div class="empty-state"><span class="big-icon">🔍</span><p>No available books match your search. Try different criteria.</p></div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<script>
+function issueSelected() {
+  var radios = document.querySelectorAll('input[name="selected_book"]');
+  var selected = null;
+  for (var r of radios) { if (r.checked) { selected = r.value; break; } }
+  if (!selected) {
+    alert('Please select a book using the radio button before proceeding.');
+    return;
+  }
+  window.location.href = '{{ url_for("book_issue") }}?book_id=' + selected;
+}
+</script>
+{% endblock %}

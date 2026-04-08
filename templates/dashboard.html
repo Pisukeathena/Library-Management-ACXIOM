@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — LibraryMS{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card c-lime" data-num="{{ total_books }}"><div class="icon-wrap">📚</div><div class="stat-label">Total Books</div><div class="stat-value">{{ total_books }}</div><div class="stat-sub">In catalogue</div></div>
+  <div class="stat-card c-sky" data-num="{{ total_members }}"><div class="icon-wrap">👥</div><div class="stat-label">Active Members</div><div class="stat-value">{{ total_members }}</div><div class="stat-sub">Memberships</div></div>
+  <div class="stat-card c-emerald" data-num="{{ total_issued }}"><div class="icon-wrap">↗</div><div class="stat-label">Currently Issued</div><div class="stat-value">{{ total_issued }}</div><div class="stat-sub">Books out</div></div>
+  <div class="stat-card c-coral" data-num="{{ total_overdue }}"><div class="icon-wrap">⚠</div><div class="stat-label">Overdue</div><div class="stat-value">{{ total_overdue }}</div><div class="stat-sub">Need attention</div></div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 300px;gap:18px;">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Recent Transactions</span><a href="{{ url_for('transactions') }}" class="btn btn-outline btn-sm">View all →</a></div>
+    <div class="table-wrap">
+      {% if recent_tx %}
+      <table>
+        <thead><tr><th>#</th><th>Book</th><th>Member</th><th>Issue Date</th><th>Return Date</th><th>Status</th><th>Fine</th></tr></thead>
+        <tbody>
+          {% for tx in recent_tx %}
+          <tr>
+            <td style="color:var(--ink3);font-size:12px">{{ tx.id }}</td>
+            <td style="font-weight:500">{{ tx.book.title }}</td>
+            <td>{{ tx.membership.name }}</td>
+            <td style="font-size:12px;color:var(--ink3)">{{ tx.issue_date }}</td>
+            <td style="font-size:12px;color:var(--ink3)">{{ tx.return_date }}</td>
+            <td><span class="badge badge-{{ tx.status.lower() }}">{{ tx.status }}</span></td>
+            <td>{% if tx.fine_amount > 0 %}<span style="color:var(--coral);font-weight:600">₹{{ tx.fine_amount|int }}</span>{% else %}—{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state"><span class="big-icon">📋</span><p>No transactions yet. <a href="{{ url_for('book_issue') }}">Issue a book</a></p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:14px;">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Quick Actions</span></div>
+      <div class="quick-actions-grid">
+        <a href="{{ url_for('book_search') }}" class="quick-card"><span class="qc-icon">🔍</span>Search Book</a>
+        <a href="{{ url_for('book_issue') }}" class="quick-card"><span class="qc-icon">↗</span>Issue Book</a>
+        <a href="{{ url_for('book_return') }}" class="quick-card"><span class="qc-icon">↩</span>Return Book</a>
+        <a href="{{ url_for('reports') }}" class="quick-card"><span class="qc-icon">📊</span>Reports</a>
+        {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('add_book') }}" class="quick-card"><span class="qc-icon">📗</span>Add Book</a>
+        <a href="{{ url_for('add_membership') }}" class="quick-card"><span class="qc-icon">👤</span>Add Member</a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Account</span></div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--ink3)">Logged in as</span><span style="font-weight:500">{{ current_user.name }}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--ink3)">Role</span><span class="badge badge-{% if current_user.role=='admin' %}premium{% else %}standard{% endif %}">{{ current_user.role.title() }}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--ink3)">Fine rate</span><span style="color:var(--amber);font-weight:600">₹5 / day</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--ink3)">Max loan</span><span style="font-weight:500">15 days</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

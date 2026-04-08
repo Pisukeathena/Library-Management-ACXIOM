@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Transactions — LibraryMS{% endblock %}
+{% block page_title %}Transactions{% endblock %}
+{% block topbar_actions %}<a href="{{ url_for('book_issue') }}" class="btn btn-primary">+ Issue Book</a>{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">All Transactions <span style="color:var(--ink3);font-weight:400;font-family:var(--font-body)">({{ transactions|length }})</span></span>
+  </div>
+  <div class="table-wrap">
+    {% if transactions %}
+    <table>
+      <thead><tr><th>#</th><th>Book</th><th>Serial No</th><th>Member</th><th>Issue Date</th><th>Due Date</th><th>Returned</th><th>Status</th><th>Fine</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for tx in transactions %}
+        <tr>
+          <td style="color:var(--ink3);font-size:12px">{{ tx.id }}</td>
+          <td style="font-weight:500;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ tx.book.title }}</td>
+          <td style="font-family:monospace;font-size:12px;color:var(--ink3)">{{ tx.serial_no }}</td>
+          <td style="color:var(--ink2)">{{ tx.membership.name }}</td>
+          <td style="font-size:12px;color:var(--ink3)">{{ tx.issue_date }}</td>
+          <td style="font-size:12px;{% if tx.status=='Overdue' %}color:var(--coral);font-weight:600{% else %}color:var(--ink3){% endif %}">{{ tx.return_date }}</td>
+          <td style="font-size:12px;color:var(--emerald)">{{ tx.actual_return or '—' }}</td>
+          <td><span class="badge badge-{{ tx.status.lower() }}">{{ tx.status }}</span></td>
+          <td>{% if tx.fine_amount > 0 %}<span style="font-weight:600;color:{% if tx.fine_paid %}var(--emerald){% else %}var(--coral){% endif %}">₹{{ tx.fine_amount|int }}{% if tx.fine_paid %} ✓{% endif %}</span>{% else %}—{% endif %}</td>
+          <td>
+            <div class="btn-group">
+              {% if tx.status in ('Issued','Overdue') %}
+              <a href="{{ url_for('book_return') }}?tx_id={{ tx.id }}" class="btn btn-success btn-sm">Return</a>
+              {% endif %}
+              {% if tx.fine_amount > 0 and not tx.fine_paid and tx.status == 'Returned' %}
+              <a href="{{ url_for('fine_pay', tx_id=tx.id) }}" class="btn btn-warning btn-sm">Pay Fine</a>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state"><span class="big-icon">📋</span><p>No transactions yet.</p></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

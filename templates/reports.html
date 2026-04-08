@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Reports — LibraryMS{% endblock %}
+{% block page_title %}Reports & Analytics{% endblock %}
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card c-lime" data-num="{{ total_books }}"><div class="icon-wrap">📚</div><div class="stat-label">Total Books</div><div class="stat-value">{{ total_books }}</div></div>
+  <div class="stat-card c-sky" data-num="{{ total_members }}"><div class="icon-wrap">👥</div><div class="stat-label">Active Members</div><div class="stat-value">{{ total_members }}</div></div>
+  <div class="stat-card c-emerald" data-num="{{ total_returned }}"><div class="icon-wrap">✓</div><div class="stat-label">Returned</div><div class="stat-value">{{ total_returned }}</div></div>
+  <div class="stat-card c-coral" data-num="{{ total_overdue }}"><div class="icon-wrap">⚠</div><div class="stat-label">Overdue</div><div class="stat-value">{{ total_overdue }}</div></div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px;">
+  <div class="stat-card c-emerald"><div class="icon-wrap">💰</div><div class="stat-label">Fine Collected</div><div class="stat-value" style="font-size:26px;">₹{{ fine_collected|int }}</div><div class="stat-sub">Paid fines</div></div>
+  <div class="stat-card c-coral"><div class="icon-wrap">⏳</div><div class="stat-label">Fine Pending</div><div class="stat-value" style="font-size:26px;">₹{{ fine_pending|int }}</div><div class="stat-sub">Unpaid fines</div></div>
+  <div class="stat-card c-sky"><div class="icon-wrap">📈</div><div class="stat-label">Currently Issued</div><div class="stat-value" style="font-size:26px;">{{ total_issued }}</div><div class="stat-sub">Books out now</div></div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Most Borrowed Books</span><span style="font-size:12px;color:var(--ink3);">Top 5</span></div>
+    {% if popular %}
+      {% set max_c = popular[0][1] %}
+      {% for title, cnt in popular %}
+      <div class="report-bar">
+        <div class="report-bar-label" title="{{ title }}">{{ title }}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:{{ (cnt/max_c*100)|int }}%"></div></div>
+        <div class="bar-count">{{ cnt }}</div>
+      </div>
+      {% endfor %}
+    {% else %}<div class="empty-state" style="padding:24px 0;"><p>No data yet.</p></div>{% endif %}
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Most Active Members</span><span style="font-size:12px;color:var(--ink3);">Top 5</span></div>
+    {% if active_members %}
+      {% set max_m = active_members[0][1] %}
+      {% for name, cnt in active_members %}
+      <div class="report-bar">
+        <div class="report-bar-label">{{ name }}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:{{ (cnt/max_m*100)|int }}%;background:var(--sky);"></div></div>
+        <div class="bar-count">{{ cnt }}</div>
+      </div>
+      {% endfor %}
+    {% else %}<div class="empty-state" style="padding:24px 0;"><p>No data yet.</p></div>{% endif %}
+  </div>
+</div>
+{% endblock %}

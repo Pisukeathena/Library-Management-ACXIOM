@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Add Membership — LibraryMS{% endblock %}
+{% block page_title %}Add Membership{% endblock %}
+{% block topbar_actions %}<a href="{{ url_for('maintenance') }}" class="btn btn-outline btn-sm">← Maintenance</a>{% endblock %}
+{% block content %}
+<div class="card" style="max-width:680px">
+  <div class="card-header"><span class="card-title">Register New Member</span></div>
+  <form method="POST" action="{{ url_for('add_membership') }}">
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Full Name *</label>
+        <input type="text" name="name" class="form-control" placeholder="Member's full name" value="{{ form.get('name','') }}" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email *</label>
+        <input type="email" name="email" class="form-control" placeholder="member@email.com" value="{{ form.get('email','') }}" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone *</label>
+        <input type="text" name="phone" class="form-control" placeholder="10-digit mobile" value="{{ form.get('phone','') }}" required/>
+      </div>
+      <div class="form-group" style="grid-column:1/-1;">
+        <label class="form-label">Address *</label>
+        <textarea name="address" class="form-control" rows="2" placeholder="Full address" required>{{ form.get('address','') }}</textarea>
+      </div>
+    </div>
+
+    <!-- Membership duration radio -->
+    <div class="form-group">
+      <label class="form-label">Membership Duration * <span style="font-size:10px;color:var(--ink3);">(select one — default 6 months)</span></label>
+      <div style="display:flex;gap:28px;padding:12px 0;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;padding:10px 16px;border:1px solid var(--border);border-radius:var(--radius);transition:all 0.2s;" onclick="this.style.borderColor='var(--lime)'">
+          <input type="radio" name="duration" value="6months" {% if form.get('duration','6months')=='6months' %}checked{% endif %} required style="width:16px;height:16px;accent-color:var(--lime);"/>
+          6 Months
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;padding:10px 16px;border:1px solid var(--border);border-radius:var(--radius);transition:all 0.2s;">
+          <input type="radio" name="duration" value="1year" {% if form.get('duration')=='1year' %}checked{% endif %} style="width:16px;height:16px;accent-color:var(--lime);"/>
+          1 Year
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;padding:10px 16px;border:1px solid var(--border);border-radius:var(--radius);transition:all 0.2s;">
+          <input type="radio" name="duration" value="2years" {% if form.get('duration')=='2years' %}checked{% endif %} style="width:16px;height:16px;accent-color:var(--lime);"/>
+          2 Years
+        </label>
+      </div>
+    </div>
+
+    <div class="btn-group" style="margin-top:8px;">
+      <button type="submit" class="btn btn-primary">Create Membership</button>
+      <a href="{{ url_for('maintenance') }}" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

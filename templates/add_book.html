@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Add Book — LibraryMS{% endblock %}
+{% block page_title %}Add Book / Movie{% endblock %}
+{% block topbar_actions %}<a href="{{ url_for('maintenance') }}" class="btn btn-outline btn-sm">← Maintenance</a>{% endblock %}
+{% block content %}
+<div class="card" style="max-width:720px">
+  <div class="card-header"><span class="card-title">Add New Book or Movie</span></div>
+  <form method="POST" action="{{ url_for('add_book') }}">
+
+    <!-- Type radio -->
+    <div class="form-group">
+      <label class="form-label">Type * <span style="font-size:10px;color:var(--ink3);">(select one)</span></label>
+      <div style="display:flex;gap:24px;padding:12px 0;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;">
+          <input type="radio" name="item_type" value="book" {% if form.get('item_type','book')=='book' %}checked{% endif %} style="width:16px;height:16px;accent-color:var(--lime);"/>
+          📖 Book
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;">
+          <input type="radio" name="item_type" value="movie" {% if form.get('item_type')=='movie' %}checked{% endif %} style="width:16px;height:16px;accent-color:var(--lime);"/>
+          🎬 Movie
+        </label>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Serial Number *</label>
+        <input type="text" name="serial_no" class="form-control" placeholder="e.g. BK005" value="{{ form.get('serial_no','') }}" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Title *</label>
+        <input type="text" name="title" class="form-control" placeholder="Book or movie title" value="{{ form.get('title','') }}" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Author / Director *</label>
+        <input type="text" name="author" class="form-control" placeholder="Author or director name" value="{{ form.get('author','') }}" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ISBN / ID *</label>
+        <input type="text" name="isbn" class="form-control" placeholder="Unique ISBN or ID" value="{{ form.get('isbn','') }}" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select name="category_id" class="form-control">
+          <option value="">— Select Category —</option>
+          {% for cat in categories %}
+          <option value="{{ cat.id }}" {% if form.get('category_id')==cat.id|string %}selected{% endif %}>{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Total Copies *</label>
+        <input type="number" name="total_copies" class="form-control" min="1" placeholder="e.g. 3" value="{{ form.get('total_copies','1') }}" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Published Year *</label>
+        <input type="number" name="published_year" class="form-control" min="1800" max="2026" placeholder="e.g. 2020" value="{{ form.get('published_year','') }}" required/>
+      </div>
+    </div>
+
+    <div class="btn-group" style="margin-top:8px;">
+      <button type="submit" class="btn btn-primary">+ Add to Catalogue</button>
+      <a href="{{ url_for('maintenance') }}" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

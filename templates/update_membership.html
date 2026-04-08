@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Update Membership — LibraryMS{% endblock %}
+{% block page_title %}Update Membership{% endblock %}
+{% block topbar_actions %}<a href="{{ url_for('maintenance') }}" class="btn btn-outline btn-sm">← Maintenance</a>{% endblock %}
+{% block content %}
+<div class="card" style="max-width:640px;margin-bottom:18px;">
+  <div class="card-header"><span class="card-title">Search Membership</span></div>
+  <form method="POST" action="{{ url_for('update_membership') }}">
+    <input type="hidden" name="action" value="search"/>
+    <div style="display:flex;gap:10px;align-items:flex-end;">
+      <div class="form-group" style="flex:1;margin-bottom:0;">
+        <label class="form-label">Membership Number *</label>
+        <input type="text" name="membership_no" class="form-control" placeholder="e.g. MEM0001" required/>
+      </div>
+      <button type="submit" class="btn btn-primary">🔍 Find</button>
+    </div>
+  </form>
+</div>
+
+{% if membership %}
+<div class="card" style="max-width:640px;">
+  <div class="card-header"><span class="card-title">Membership: {{ membership.membership_no }}</span><span class="badge badge-{% if membership.status=='Active' %}active{% else %}inactive{% endif %}">{{ membership.status }}</span></div>
+
+  <!-- Current details -->
+  <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:18px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div><span style="font-size:11px;color:var(--ink3);">Name</span><div style="font-weight:600">{{ membership.name }}</div></div>
+      <div><span style="font-size:11px;color:var(--ink3);">Email</span><div>{{ membership.email }}</div></div>
+      <div><span style="font-size:11px;color:var(--ink3);">Phone</span><div>{{ membership.phone }}</div></div>
+      <div><span style="font-size:11px;color:var(--ink3);">Duration</span><div>{{ membership.duration }}</div></div>
+      <div><span style="font-size:11px;color:var(--ink3);">Start Date</span><div>{{ membership.start_date }}</div></div>
+      <div><span style="font-size:11px;color:var(--ink3);">Expiry Date</span><div style="font-weight:600;color:var(--amber)">{{ membership.expiry_date }}</div></div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <!-- Extend -->
+    <form method="POST" action="{{ url_for('update_membership') }}" style="border:1px solid var(--border);border-radius:var(--radius);padding:16px;">
+      <input type="hidden" name="action" value="update"/>
+      <input type="hidden" name="mem_id" value="{{ membership.id }}"/>
+      <input type="hidden" name="sub_action" value="extend"/>
+      <div class="form-label" style="margin-bottom:10px;">Extend Membership</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
+          <input type="radio" name="extension" value="6months" checked style="accent-color:var(--lime);"/> 6 Months (default)
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
+          <input type="radio" name="extension" value="1year" style="accent-color:var(--lime);"/> 1 Year
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
+          <input type="radio" name="extension" value="2years" style="accent-color:var(--lime);"/> 2 Years
+        </label>
+      </div>
+      <button type="submit" class="btn btn-success" style="width:100%;justify-content:center;">Extend →</button>
+    </form>
+
+    <!-- Cancel -->
+    <form method="POST" action="{{ url_for('update_membership') }}" style="border:1px solid var(--border);border-radius:var(--radius);padding:16px;">
+      <input type="hidden" name="action" value="update"/>
+      <input type="hidden" name="mem_id" value="{{ membership.id }}"/>
+      <input type="hidden" name="sub_action" value="cancel"/>
+      <div class="form-label" style="margin-bottom:10px;">Cancel Membership</div>
+      <p style="font-size:12.5px;color:var(--ink2);margin-bottom:14px;line-height:1.6;">This will cancel the membership immediately. The member will no longer be able to borrow books.</p>
+      <button type="submit" class="btn btn-danger" style="width:100%;justify-content:center;" onclick="return confirm('Cancel this membership?')">Cancel Membership</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

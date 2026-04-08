@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Update Book — LibraryMS{% endblock %}
+{% block page_title %}Update Book{% endblock %}
+{% block topbar_actions %}<a href="{{ url_for('maintenance') }}" class="btn btn-outline btn-sm">← Maintenance</a>{% endblock %}
+{% block content %}
+<div class="card" style="max-width:720px;margin-bottom:18px;">
+  <div class="card-header"><span class="card-title">Search Book to Update</span></div>
+  <form method="POST" action="{{ url_for('update_book') }}">
+    <input type="hidden" name="action" value="search"/>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Serial Number</label>
+        <input type="text" name="search_serial" class="form-control" placeholder="e.g. BK001"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ISBN</label>
+        <input type="text" name="search_isbn" class="form-control" placeholder="e.g. 9780743273565"/>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--ink3);margin-bottom:12px;">Enter Serial No or ISBN to find the book.</p>
+    <button type="submit" class="btn btn-primary">🔍 Find Book</button>
+  </form>
+</div>
+
+{% if book %}
+<div class="card" style="max-width:720px;">
+  <div class="card-header"><span class="card-title">Update: {{ book.title }}</span></div>
+  <form method="POST" action="{{ url_for('update_book') }}">
+    <input type="hidden" name="action" value="update"/>
+    <input type="hidden" name="book_id" value="{{ book.id }}"/>
+
+    <div class="form-group">
+      <label class="form-label">Type *</label>
+      <div style="display:flex;gap:24px;padding:10px 0;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;">
+          <input type="radio" name="item_type" value="book" {% if book.item_type=='book' %}checked{% endif %} style="width:16px;height:16px;accent-color:var(--lime);"/> 📖 Book
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;">
+          <input type="radio" name="item_type" value="movie" {% if book.item_type=='movie' %}checked{% endif %} style="width:16px;height:16px;accent-color:var(--lime);"/> 🎬 Movie
+        </label>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Serial Number *</label>
+        <input type="text" name="serial_no" class="form-control" value="{{ book.serial_no }}" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Title *</label>
+        <input type="text" name="title" class="form-control" value="{{ book.title }}" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Author / Director *</label>
+        <input type="text" name="author" class="form-control" value="{{ book.author }}" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ISBN / ID *</label>
+        <input type="text" name="isbn" class="form-control" value="{{ book.isbn }}" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select name="category_id" class="form-control">
+          <option value="">— No Category —</option>
+          {% for cat in categories %}
+          <option value="{{ cat.id }}" {% if book.category_id==cat.id %}selected{% endif %}>{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Total Copies *</label>
+        <input type="number" name="total_copies" class="form-control" min="1" value="{{ book.total_copies }}" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Published Year *</label>
+        <input type="number" name="published_year" class="form-control" min="1800" max="2026" value="{{ book.published_year }}" required/>
+      </div>
+    </div>
+    <div class="btn-group" style="margin-top:8px;">
+      <button type="submit" class="btn btn-primary">Update Book</button>
+      <a href="{{ url_for('update_book') }}" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endif %}
+{% endblock %}
